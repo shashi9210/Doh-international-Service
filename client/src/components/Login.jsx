@@ -1,34 +1,39 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import { Layout, Mail, Lock, AlertCircle, ShieldCheck, Globe, Plus, Eye, EyeOff } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { useNavigate } from 'react-router-dom';
+import { Mail, Lock, AlertCircle, ShieldCheck, Globe, Plus, Eye, EyeOff } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
-const Login = ({ setAuth, toggleAuthMode }) => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
+const schema = yup.object().shape({
+    email: yup.string().email('Invalid email format').required('Email is required'),
+    password: yup.string().required('Password is required'),
+});
+
+const Login = () => {
+    const { login } = useAuth();
+    const navigate = useNavigate();
+    const [loginError, setLoginError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
+    const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
+        resolver: yupResolver(schema)
+    });
 
-        try {
-            const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
-            localStorage.setItem('token', res.data.token);
-            localStorage.setItem('user', JSON.stringify(res.data.user));
-            setAuth(res.data.user);
-        } catch (err) {
-            setError(err.response?.data?.message || 'Authentication sequence failed. Verify credentials.');
-        } finally {
-            setLoading(false);
+    const onSubmit = async (data) => {
+        setLoginError('');
+        const res = await login(data.email, data.password);
+        if (res.success) {
+            navigate('/dashboard');
+        } else {
+            console.error(res.error);
+            setLoginError(res.error || 'Login failed');
         }
     };
 
     return (
         <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#020617] flex items-center justify-center p-6 font-['Inter'] transition-colors duration-1000 relative overflow-hidden text-left">
-            {/* Background Decorative Blurs */}
             <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-500/10 dark:bg-blue-600/5 rounded-full blur-[120px] -mr-40 -mt-40"></div>
             <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-400/10 dark:bg-indigo-600/5 rounded-full blur-[100px] -ml-20 -mb-20"></div>
 
@@ -52,27 +57,26 @@ const Login = ({ setAuth, toggleAuthMode }) => {
                         <p className="text-slate-600 dark:text-slate-400 font-medium max-w-sm mx-auto">Enterprise Operations Management Mesh Terminal Authentication.</p>
                     </div>
 
-                    {error && (
+                    {loginError && (
                         <div className="mb-8 p-5 bg-rose-50/50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/40 rounded-3xl flex items-center gap-4 text-rose-600 dark:text-rose-400 text-sm animate-in shake duration-500 backdrop-blur-sm">
                             <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                            <p className="font-black uppercase tracking-widest text-left text-[11px] leading-relaxed">{error}</p>
+                            <p className="font-black uppercase tracking-widest text-left text-[11px] leading-relaxed">{loginError}</p>
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-6 text-left">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 text-left">
                         <div className="space-y-3">
                             <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em] ml-4">Mesh Credential ID</label>
                             <div className="relative group">
                                 <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 dark:text-slate-600 group-focus-within:text-blue-500 transition-all" />
                                 <input
+                                    {...register('email')}
                                     type="email"
-                                    required
-                                    className="w-full pl-16 pr-8 py-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-slate-800 dark:text-white font-black"
+                                    className={`w-full pl-16 pr-8 py-4 bg-slate-50 dark:bg-slate-950 border ${errors.email ? 'border-rose-500' : 'border-slate-200'} dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-slate-800 dark:text-white font-black`}
                                     placeholder="admin@doh.com"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
                                 />
                             </div>
+                            {errors.email && <p className="text-rose-500 text-[10px] ml-4 font-bold">{errors.email.message}</p>}
                         </div>
 
                         <div className="space-y-3">
@@ -80,12 +84,10 @@ const Login = ({ setAuth, toggleAuthMode }) => {
                             <div className="relative group">
                                 <Lock className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 dark:text-slate-600 group-focus-within:text-blue-500 transition-all" />
                                 <input
+                                    {...register('password')}
                                     type={showPassword ? "text" : "password"}
-                                    required
-                                    className="w-full pl-16 pr-14 py-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-slate-800 dark:text-white font-black"
+                                    className={`w-full pl-16 pr-14 py-4 bg-slate-50 dark:bg-slate-950 border ${errors.password ? 'border-rose-500' : 'border-slate-200'} dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-slate-800 dark:text-white font-black`}
                                     placeholder="••••••••••••"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
                                 />
                                 <button
                                     type="button"
@@ -95,14 +97,15 @@ const Login = ({ setAuth, toggleAuthMode }) => {
                                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                 </button>
                             </div>
+                            {errors.password && <p className="text-rose-500 text-[10px] ml-4 font-bold">{errors.password.message}</p>}
                         </div>
 
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={isSubmitting}
                             className="w-full py-5 bg-blue-600 hover:bg-blue-700 text-white rounded-[2rem] font-black uppercase tracking-[0.3em] shadow-[0_20px_40px_-10px_rgba(37,99,235,0.3)] transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-50 group flex items-center justify-center gap-4 mt-10"
                         >
-                            {loading ? (
+                            {isSubmitting ? (
                                 <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
                             ) : (
                                 <>
@@ -118,7 +121,7 @@ const Login = ({ setAuth, toggleAuthMode }) => {
                             NEW USER?
                             <button
                                 type="button"
-                                onClick={toggleAuthMode}
+                                onClick={() => navigate('/register')}
                                 className="text-blue-600 dark:text-blue-400 hover:underline decoration-2 underline-offset-8 ml-2 font-black"
                             >
                                 REGISTER
