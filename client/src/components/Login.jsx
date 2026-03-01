@@ -66,28 +66,28 @@ const Login = () => {
 
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 text-left">
                         <div className="space-y-3">
-                            <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em] ml-4">Mesh Credential ID</label>
+                            <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em] ml-4">Email</label>
                             <div className="relative group">
                                 <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 dark:text-slate-600 group-focus-within:text-blue-500 transition-all" />
                                 <input
                                     {...register('email')}
                                     type="email"
                                     className={`w-full pl-16 pr-8 py-4 bg-slate-50 dark:bg-slate-950 border ${errors.email ? 'border-rose-500' : 'border-slate-200'} dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-slate-800 dark:text-white font-black`}
-                                    placeholder="admin@doh.com"
+                                    placeholder="Enter your email"
                                 />
                             </div>
                             {errors.email && <p className="text-rose-500 text-[10px] ml-4 font-bold">{errors.email.message}</p>}
                         </div>
 
                         <div className="space-y-3">
-                            <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em] ml-4">Security Protocol Token</label>
+                            <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em] ml-4">Password</label>
                             <div className="relative group">
                                 <Lock className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 dark:text-slate-600 group-focus-within:text-blue-500 transition-all" />
                                 <input
                                     {...register('password')}
                                     type={showPassword ? "text" : "password"}
                                     className={`w-full pl-16 pr-14 py-4 bg-slate-50 dark:bg-slate-950 border ${errors.password ? 'border-rose-500' : 'border-slate-200'} dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-slate-800 dark:text-white font-black`}
-                                    placeholder="••••••••••••"
+                                    placeholder="Enter your password"
                                 />
                                 <button
                                     type="button"
