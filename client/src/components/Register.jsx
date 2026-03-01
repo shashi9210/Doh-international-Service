@@ -3,13 +3,13 @@ import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useNavigate } from 'react-router-dom';
-import { Layout, Mail, Lock, AlertCircle, ShieldCheck, Globe, Plus, User, Briefcase, MapPin, Eye, EyeOff, Phone, Calendar, Upload, Search, ChevronDown } from 'lucide-react';
+import { Layout, Mail, Lock, AlertCircle, ShieldCheck, Globe, Plus, User, Briefcase, MapPin, Eye, EyeOff, Phone, Calendar, Upload, Search, ChevronDown, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const schema = yup.object().shape({
     firstName: yup.string().min(2, 'Min 2 chars').required('Required'),
     lastName: yup.string().required('Required'),
-    countryCode: yup.string().required('Required'),
     phone: yup.string().matches(/^\d{7,12}$/, 'Invalid number').required('Required'),
     email: yup.string().email('Invalid email').required('Required'),
     password: yup.string()
@@ -21,17 +21,24 @@ const schema = yup.object().shape({
         .required('Required'),
     confirmPassword: yup.string()
         .oneOf([yup.ref('password'), null], 'Passwords must match'),
-    dateOfJoining: yup.date().max(new Date(), 'Date cannot be in future').required('Required'),
+    dateOfJoining: yup.date()
+        .transform((value, originalValue) => originalValue === '' ? null : value)
+        .nullable()
+        .typeError('Invalid date format')
+        .required('Required')
+        .max(new Date(), 'Date cannot be in future'),
     role: yup.string().required(),
     post: yup.string().required('Required'),
     branch: yup.string().required(),
     photo: yup.mixed().required('Passport photo is required')
         .test('fileSize', 'File too large (max 2MB)', (value) => {
-            return value && value[0] && value[0].size <= 2000000;
+            if (!value || value.length === 0) return true;
+            return value[0].size <= 2000000;
         })
         .test('fileType', 'Unsupported Format', (value) => {
-            return value && value[0] && ['image/jpeg', 'image/png', 'image/gif'].includes(value[0].type);
-        })
+            if (!value || value.length === 0) return true;
+            return ['image/jpeg', 'image/png', 'image/gif'].includes(value[0].type);
+        }),
 });
 
 const countryCodes = [
@@ -311,6 +318,7 @@ const Register = () => {
 
     // Convert text input type to date on focus
     const [dateInputType, setDateInputType] = useState('text');
+    const { theme, toggleTheme } = useTheme();
 
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
         resolver: yupResolver(schema),
@@ -349,6 +357,16 @@ const Register = () => {
 
     return (
         <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#020617] flex items-center justify-center p-6 font-['Inter'] transition-colors duration-1000 relative overflow-hidden text-left">
+            {/* Theme Toggle */}
+            <div className="absolute top-6 right-6 z-50">
+                <button
+                    onClick={toggleTheme}
+                    className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl text-slate-500 hover:text-blue-600 transition-all hover:scale-110 active:scale-95"
+                    title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+                >
+                    {theme === 'light' ? <Moon size={24} /> : <Sun size={24} />}
+                </button>
+            </div>
             <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-500/10 dark:bg-blue-600/5 rounded-full blur-[120px] -mr-40 -mt-40"></div>
             <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-400/10 dark:bg-indigo-600/5 rounded-full blur-[100px] -ml-20 -mb-20"></div>
 

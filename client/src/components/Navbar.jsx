@@ -12,13 +12,17 @@ import {
     Menu,
     X,
     Bell,
-    Search
+    Search,
+    Sun,
+    Moon
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const Navbar = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const { logout, user } = useAuth();
+    const { theme, toggleTheme } = useTheme();
 
     const navItems = [
         { name: 'Dashboard', path: '/', icon: LayoutDashboard },
@@ -71,6 +75,14 @@ const Navbar = () => {
                             <span className="absolute top-2 right-2 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-slate-900"></span>
                         </button>
 
+                        <button
+                            onClick={toggleTheme}
+                            className="p-2 text-slate-500 hover:text-blue-600 transition-colors rounded-lg bg-slate-100 dark:bg-slate-800"
+                            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+                        >
+                            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+                        </button>
+
                         <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
 
                         {/* User Profile Dropdown Placeholder */}
@@ -79,7 +91,18 @@ const Navbar = () => {
                                 <p className="text-sm font-semibold text-slate-900 dark:text-white leading-none">{user?.firstName}</p>
                                 <p className="text-xs text-slate-500 mt-1 uppercase tracking-wider font-bold">{user?.post}</p>
                             </div>
-                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold border-2 border-white dark:border-slate-800 shadow-sm">
+                            {user?.photo && user.photo !== 'default-avatar.png' ? (
+                                <img
+                                    src={`http://localhost:5000${user.photo}`}
+                                    alt={user.firstName}
+                                    className="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-slate-800 shadow-sm"
+                                    onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                                />
+                            ) : null}
+                            <div
+                                className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold border-2 border-white dark:border-slate-800 shadow-sm"
+                                style={{ display: user?.photo && user.photo !== 'default-avatar.png' ? 'none' : 'flex' }}
+                            >
                                 {user?.firstName?.charAt(0) || 'U'}
                             </div>
                             <button
@@ -128,7 +151,18 @@ const Navbar = () => {
                     <div className="pt-4 pb-3 border-t border-slate-200 dark:border-slate-800 px-4">
                         <div className="flex items-center px-3 mb-4">
                             <div className="flex-shrink-0">
-                                <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                                {user?.photo && user.photo !== 'default-avatar.png' ? (
+                                    <img
+                                        src={`http://localhost:5000${user.photo}`}
+                                        alt={user.firstName}
+                                        className="h-10 w-10 rounded-full object-cover"
+                                        onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                                    />
+                                ) : null}
+                                <div
+                                    className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold"
+                                    style={{ display: user?.photo && user.photo !== 'default-avatar.png' ? 'none' : 'flex' }}
+                                >
                                     {user?.firstName?.charAt(0) || 'U'}
                                 </div>
                             </div>
@@ -137,6 +171,13 @@ const Navbar = () => {
                                 <div className="text-sm font-medium text-slate-500">{user?.post}</div>
                             </div>
                         </div>
+                        <button
+                            onClick={toggleTheme}
+                            className="flex w-full items-center px-3 py-3 rounded-md text-base font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 mb-2"
+                        >
+                            {theme === 'light' ? <Moon size={20} className="mr-4" /> : <Sun size={20} className="mr-4" />}
+                            {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+                        </button>
                         <button
                             onClick={logout}
                             className="flex w-full items-center px-3 py-3 rounded-md text-base font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10"

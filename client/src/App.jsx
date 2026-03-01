@@ -116,15 +116,17 @@ const LayoutWrapper = () => {
   );
 };
 
+import { ThemeProvider, useTheme } from './context/ThemeContext';
+
 function App() {
   return (
-    <AuthProvider>
-      <div className="font-['Inter'] antialiased min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900">
+    <ThemeProvider>
+      <AuthProvider>
         <Router>
           <LayoutWrapper />
         </Router>
-      </div>
-    </AuthProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

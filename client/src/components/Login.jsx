@@ -3,8 +3,9 @@ import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, AlertCircle, ShieldCheck, Globe, Plus, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, AlertCircle, ShieldCheck, Globe, Plus, Eye, EyeOff, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const schema = yup.object().shape({
     email: yup.string().email('Invalid email format').required('Email is required'),
@@ -16,6 +17,7 @@ const Login = () => {
     const navigate = useNavigate();
     const [loginError, setLoginError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const { theme, toggleTheme } = useTheme();
 
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
         resolver: yupResolver(schema)
@@ -34,6 +36,16 @@ const Login = () => {
 
     return (
         <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#020617] flex items-center justify-center p-6 font-['Inter'] transition-colors duration-1000 relative overflow-hidden text-left">
+            {/* Theme Toggle */}
+            <div className="absolute top-6 right-6 z-50">
+                <button
+                    onClick={toggleTheme}
+                    className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl text-slate-500 hover:text-blue-600 transition-all hover:scale-110 active:scale-95"
+                    title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+                >
+                    {theme === 'light' ? <Moon size={24} /> : <Sun size={24} />}
+                </button>
+            </div>
             <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-500/10 dark:bg-blue-600/5 rounded-full blur-[120px] -mr-40 -mt-40"></div>
             <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-400/10 dark:bg-indigo-600/5 rounded-full blur-[100px] -ml-20 -mb-20"></div>
 
