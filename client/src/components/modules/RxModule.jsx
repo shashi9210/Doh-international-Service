@@ -10,7 +10,7 @@ const RxModule = () => {
         const fetchUsers = async () => {
             try {
                 const res = await axios.get('/users?branch=DOH RX');
-                setUsers(res.data);
+                setUsers(res.data.data || []);
                 setLoading(false);
             } catch (err) {
                 console.error(err);

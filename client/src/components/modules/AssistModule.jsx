@@ -10,7 +10,7 @@ const AssistModule = () => {
         const fetchUsers = async () => {
             try {
                 const res = await axios.get('/users?branch=DOH ASSIST');
-                setUsers(res.data);
+                setUsers(res.data.data || []);
                 setLoading(false);
             } catch (err) {
                 console.error(err);

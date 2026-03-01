@@ -25,9 +25,10 @@ const UserSchema = new mongoose.Schema({
         trim: true,
         validate: {
             validator: function (v) {
-                return /\d{10}/.test(v);
+                // Allow + prefix and 10 to 15 digits
+                return /^\+?\d{10,15}$/.test(v);
             },
-            message: props => `${props.value} is not a valid 10-digit phone number!`
+            message: props => `${props.value} is not a valid phone number!`
         }
     },
     email: {
@@ -53,12 +54,14 @@ const UserSchema = new mongoose.Schema({
     post: {
         type: String,
         enum: ['Co Founder', 'HR Manager', 'Supervisor', 'Agent'],
-        required: [true, 'Post is required']
+        required: [true, 'Post is required'],
+        index: true // Optimized query performance for RBAC
     },
     branch: {
         type: String,
         enum: ['IT', 'DOH RX', 'DOH ASSIST', 'DOH SHIELD'],
-        required: [true, 'Branch is required']
+        required: [true, 'Branch is required'],
+        index: true // Optimized query performance for RBAC
     },
     dateOfJoining: {
         type: Date,

@@ -12,6 +12,36 @@ export const AuthProvider = ({ children }) => {
 
     // Configure Axios defaults
     axios.defaults.baseURL = 'http://localhost:5000/api';
+    axios.defaults.withCredentials = true; // Required for httpOnly cookies
+
+    // Interceptor for 401 errors (Token expired)
+    useEffect(() => {
+        const interceptor = axios.interceptors.response.use(
+            (response) => response,
+            async (error) => {
+                const originalRequest = error.config;
+                if (error.response?.status === 401 && !originalRequest._retry) {
+                    originalRequest._retry = true;
+                    try {
+                        const res = await axios.post('/auth/refresh');
+                        if (res.data.success) {
+                            const { token } = res.data;
+                            localStorage.setItem('token', token);
+                            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                            originalRequest.headers['Authorization'] = `Bearer ${token}`;
+                            return axios(originalRequest);
+                        }
+                    } catch (refreshError) {
+                        logout();
+                        return Promise.reject(refreshError);
+                    }
+                }
+                return Promise.reject(error);
+            }
+        );
+
+        return () => axios.interceptors.response.eject(interceptor);
+    }, []);
 
     // Check for token on load
     useEffect(() => {
@@ -20,7 +50,6 @@ export const AuthProvider = ({ children }) => {
             const storedUser = localStorage.getItem('user');
 
             if (token && storedUser) {
-                // Set default headers
                 axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
                 setUser(JSON.parse(storedUser));
             }
@@ -34,14 +63,10 @@ export const AuthProvider = ({ children }) => {
         setError(null);
         try {
             const res = await axios.post('/auth/login', { email, password });
-
             const { token, user } = res.data;
 
-            // Save to local storage
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
-
-            // Set axios header
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
             setUser(user);
@@ -55,15 +80,11 @@ export const AuthProvider = ({ children }) => {
     const register = async (formData) => {
         setError(null);
         try {
-            // FormData is required for file upload
             const res = await axios.post('/auth/register', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
 
             const { token, user } = res.data;
-
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -76,11 +97,17 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const logout = () => {
+    const logout = async () => {
+        try {
+            await axios.get('/auth/logout');
+        } catch (err) {
+            console.error('Logout error:', err);
+        }
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         delete axios.defaults.headers.common['Authorization'];
         setUser(null);
+        window.location.href = '/login';
     };
 
     const value = {

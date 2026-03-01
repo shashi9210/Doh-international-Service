@@ -10,7 +10,7 @@ const ITModule = () => {
         const fetchUsers = async () => {
             try {
                 const res = await axios.get('/users?branch=IT');
-                setUsers(res.data);
+                setUsers(res.data.data || []);
                 setLoading(false);
             } catch (err) {
                 console.error(err);

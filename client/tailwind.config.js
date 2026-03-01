@@ -19,6 +19,12 @@ export default {
                     700: '#0369a1',
                     800: '#075985',
                     900: '#0c4a6e',
+                },
+                branch: {
+                    it: '#3b82f6', // Blue
+                    rx: '#10b981', // Green
+                    assist: '#8b5cf6', // Purple
+                    shield: '#ef4444', // Red
                 }
             }
         },

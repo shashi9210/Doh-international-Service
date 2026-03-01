@@ -1,29 +1,22 @@
 const express = require('express');
-const router = express.Router();
-const User = require('../models/User');
+const { getUsers, getUsersByBranch, getProfile } = require('../controllers/userController');
 const { protect } = require('../middleware/authMiddleware');
 
+const router = express.Router();
+
 // @route   GET api/users
-// @desc    Get users by branch
+// @desc    Get all users (with RBAC)
 // @access  Private
-router.get('/', protect, async (req, res) => {
-    try {
-        const { branch } = req.query;
-        let query = {};
+router.get('/', protect, getUsers);
 
-        if (branch) {
-            query.branch = branch;
-        }
+// @route   GET api/users/branch/:branchName
+// @desc    Get users by branch (with RBAC)
+// @access  Private
+router.get('/branch/:branchName', protect, getUsersByBranch);
 
-        const users = await User.find(query)
-            .select('firstName lastName email phone role post branch employeeId photo dateOfJoining')
-            .sort({ createdAt: -1 });
-
-        res.json(users);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: 'Server Error' });
-    }
-});
+// @route   GET api/users/profile (Alias for /api/profile if needed elsewhere)
+// @desc    Get current user profile
+// @access  Private
+router.get('/profile', protect, getProfile);
 
 module.exports = router;

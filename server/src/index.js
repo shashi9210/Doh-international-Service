@@ -6,6 +6,7 @@ const morgan = require('morgan');
 const path = require('path');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
+const cookieParser = require('cookie-parser');
 const { apiLimiter } = require('./middleware/rateLimiter');
 
 require('dotenv').config();
@@ -15,6 +16,7 @@ const app = express();
 // Body Parsers
 app.use(express.json({ limit: '10kb' })); // Limit body size
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser()); // Parse cookies for Refresh Token
 app.use(morgan('dev'));
 
 // Security Middleware
@@ -24,10 +26,11 @@ app.use(helmet({
 app.use(mongoSanitize()); // Prevent NoSQL Injection
 app.use(xss()); // Prevent XSS
 
-// CORS Configuration
+// CORS Configuration with Credentials Support
 app.use(cors({
-    origin: '*', // Allow all for dev, restrict in prod
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173'], // Common dev ports
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 

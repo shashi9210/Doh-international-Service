@@ -10,6 +10,10 @@
 
 :root {
   --enterprise-primary: #2563eb;
+  --color-it: #3b82f6;
+  --color-rx: #10b981;
+  --color-assist: #8b5cf6;
+  --color-shield: #ef4444;
 }
 
 body {
